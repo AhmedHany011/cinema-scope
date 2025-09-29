@@ -1,102 +1,202 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Header from '../components/Navbar.jsx';
+import MovieCard from '../components/MovieCard.jsx';
+import Loading from '../components/Loading.jsx';
+import { fetchTrendingMovies, fetchTrendingTV, fetchPopularMovies } from '../utils/tmdb';
+import { FiTrendingUp, FiStar, FiCalendar, FiChevronRight } from 'react-icons/fi';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingTV, setTrendingTV] = useState([]);
+  const [popularMovies, setPopularMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [moviesRes, tvRes, popularRes] = await Promise.all([
+          fetchTrendingMovies(),
+          fetchTrendingTV(),
+          fetchPopularMovies()
+        ]);
+        
+        setTrendingMovies(moviesRes.data.results.slice(0, 10));
+        setTrendingTV(tvRes.data.results.slice(0, 10));
+        setPopularMovies(popularRes.data.results.slice(0, 10));
+      } catch (err) {
+        setError('Failed to fetch data. Please check your API key.');
+        console.error('Error fetching data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <Loading className="h-96" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-gray-600">Please add your TMDb API key to the .env.local file.</p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 font-display">
+            Welcome to Cinema Scope
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 opacity-90">
+            Discover trending movies and TV shows, build your watchlist, and never miss what's popular.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/movies" className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              Browse Movies
+            </Link>
+            <Link href="/tv" className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+              Browse TV Shows
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Links */}
+      <section className="py-12 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Link href="/movies" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
+              <div className="flex items-center space-x-3">
+                <FiStar className="h-8 w-8 text-blue-600 group-hover:scale-110 transition-transform" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Movies</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Browse all movies</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/tv" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
+              <div className="flex items-center space-x-3">
+                <FiTrendingUp className="h-8 w-8 text-green-600 group-hover:scale-110 transition-transform" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">TV Shows</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Discover series</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/discover" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
+              <div className="flex items-center space-x-3">
+                <FiCalendar className="h-8 w-8 text-purple-600 group-hover:scale-110 transition-transform" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Discover</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Find new content</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/search" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
+              <div className="flex items-center space-x-3">
+                <FiChevronRight className="h-8 w-8 text-red-600 group-hover:scale-110 transition-transform" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Search</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Find anything</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Movies */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white font-display">Trending Movies</h2>
+            <Link href="/movies" className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
+              <span>View All</span>
+              <FiChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {trendingMovies.map((movie) => (
+              <MovieCard key={movie.id} item={movie} type="movie" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trending TV Shows */}
+      <section className="py-12 bg-gray-50 dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white font-display">Trending TV Shows</h2>
+            <Link href="/tv" className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
+              <span>View All</span>
+              <FiChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {trendingTV.map((show) => (
+              <MovieCard key={show.id} item={show} type="tv" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Movies */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white font-display">Popular Movies</h2>
+            <Link href="/movies?sort=popular" className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
+              <span>View All</span>
+              <FiChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {popularMovies.map((movie) => (
+              <MovieCard key={movie.id} item={movie} type="movie" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-gray-400">
+            &copy; 2025 Cinema Scope. Powered by TMDb API.
+          </p>
+        </div>
       </footer>
     </div>
   );
