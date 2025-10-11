@@ -55,7 +55,7 @@ export default function TVShowsPage() {
             page,
             sort_by: sortBy,
             with_genres: selectedGenres.join(','),
-            'vote_count.gte': 5  // Apply vote count filter as per project specifications
+            'vote_count.gte': 25  // Apply vote count filter as per project specifications
           };
           
           if (year) params.first_air_date_year = year;
@@ -68,7 +68,7 @@ export default function TVShowsPage() {
           const params = {
             page,
             sort_by: sortBy,
-            'vote_count.gte': 5  // Apply vote count filter as per project specifications
+            'vote_count.gte': 25  // Apply vote count filter as per project specifications
           };
           response = await discoverTV(params);
         }

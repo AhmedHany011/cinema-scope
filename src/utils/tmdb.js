@@ -4,7 +4,6 @@ const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 const BASE_URL = process.env.NEXT_PUBLIC_TMDB_BASE_URL;
 const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL;
 
-// Create axios instance
 const tmdbApi = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -19,10 +18,9 @@ export const getImageUrl = (path, size = 'w500') => {
   return `${IMAGE_BASE_URL}/${size}${path}`;
 };
 
-// Adult content filtering parameters - API level only
 const DEFAULT_MOVIE_FILTERS = {
   include_adult: 'false',
-  'vote_count.gte': 5,
+  'vote_count.gte': 25,
   'certification.lte': 'R'
 };
 
@@ -31,8 +29,7 @@ const DEFAULT_TV_FILTERS = {
   'vote_count.gte': 25
 };
 
-// Enhanced filters for multi search with additional parameters to reduce adult content
-// Based on TMDB community discussions, these parameters help reduce adult content in search results
+
 const DEFAULT_MULTI_FILTERS = {
   include_adult: 'false',
   'vote_count.gte': 25
@@ -114,45 +111,40 @@ export const fetchOnTheAirTV = (page = 1) => {
 };
 
 export const fetchMovieDetails = (id) => {
-  // Apply multiple layers of protection for individual movie details
-  return tmdbApi.get(`/movie/${id}?append_to_response=credits,videos,similar&include_adult=false`);
+  return tmdbApi.get(`/movie/${id}?append_to_response=credits,videos,similar&include_adult=false&vote_count.gte=25`);
 };
 
 export const fetchTVDetails = (id) => {
-  // Apply multiple layers of protection for individual TV show details
-  return tmdbApi.get(`/tv/${id}?append_to_response=credits,videos,similar&include_adult=false`);
+  return tmdbApi.get(`/tv/${id}?append_to_response=credits,videos,similar&include_adult=false&vote_count.gte=25`);
 };
 
 export const searchMulti = (query, page = 1) => {
-  // Based on TMDB API documentation and community discussions
-  // These are the parameters available for search/multi endpoint
   const params = new URLSearchParams({
     query: query,
     page: page.toString(),
-    include_adult: 'false'
+    include_adult: 'false',
+    'vote_count.gte': '25'
   }).toString();
   return tmdbApi.get(`/search/multi?${params}`);
 };
 
 export const searchMovies = (query, page = 1) => {
-  // Based on TMDB API documentation, these are the parameters available for search/movie endpoint
   const params = new URLSearchParams({
     query: query,
     page: page.toString(),
     include_adult: 'false',
-    'vote_count.gte': '5',
+    'vote_count.gte': '25',
     'certification.lte': 'R'
   }).toString();
   return tmdbApi.get(`/search/movie?${params}`);
 };
 
 export const searchTV = (query, page = 1) => {
-  // Based on TMDB API documentation, these are the parameters available for search/tv endpoint
   const params = new URLSearchParams({
     query: query,
     page: page.toString(),
     include_adult: 'false',
-    'vote_count.gte': '5'
+    'vote_count.gte': '25'
   }).toString();
   return tmdbApi.get(`/search/tv?${params}`);
 };
