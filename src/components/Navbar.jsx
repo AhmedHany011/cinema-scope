@@ -3,21 +3,19 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { FiSearch, FiMenu, FiX, FiHeart, FiBookmark } from 'react-icons/fi';
+import { FiSearch, FiMenu, FiX, FiHeart, FiBookmark, FiHome, FiFilm, FiTv } from 'react-icons/fi';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Movies', href: '/movies' },
-    { name: 'TV Shows', href: '/tv' },
-    { name: 'People', href: '/people' },
-    { name: 'Discover', href: '/discover' },
+    { name: 'Home', href: '/', icon: FiHome },
+    { name: 'Movies', href: '/movies', icon: FiFilm },
+    { name: 'TV Shows', href: '/tv-shows', icon: FiTv },
   ];
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 fixed w-full z-50 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -33,14 +31,15 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-15">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center space-x-1"
               >
-                {item.name}
+                <item.icon className="h-4 w-4" />
+                <span>{item.name}</span>
               </Link>
             ))}
           </nav>
@@ -80,10 +79,11 @@ const Header = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors rounded-md"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors rounded-md flex items-center space-x-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {item.name}
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.name}</span>
                 </Link>
               ))}
             </nav>

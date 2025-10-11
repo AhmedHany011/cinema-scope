@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '../components/Navbar.jsx';
 import MovieCard from '../components/MovieCard.jsx';
 import Loading from '../components/Loading.jsx';
-import { fetchTrendingMovies, fetchTrendingTV, fetchPopularMovies } from '../utils/tmdb';
-import { FiTrendingUp, FiStar, FiCalendar, FiChevronRight } from 'react-icons/fi';
+import { fetchTrendingMovies, fetchTrendingTV, fetchPopularMovies } from '../utils/tmdb.js';
+import { FiTrendingUp, FiStar, FiCalendar, FiChevronRight, FiFilm, FiTv } from 'react-icons/fi';
 
 export default function Home() {
   const [trendingMovies, setTrendingMovies] = useState([]);
@@ -42,7 +41,6 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <Header />
         <Loading className="h-96" />
       </div>
     );
@@ -51,7 +49,6 @@ export default function Home() {
   if (error) {
     return (
       <div className="min-h-screen">
-        <Header />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
             <p className="text-red-600 mb-4">{error}</p>
@@ -64,8 +61,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <Header />
-      
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 text-center">
@@ -76,11 +71,13 @@ export default function Home() {
             Discover trending movies and TV shows, build your watchlist, and never miss what's popular.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/movies" className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Browse Movies
+            <Link href="/movies" className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center space-x-2">
+              <FiFilm className="h-5 w-5" />
+              <span>Browse Movies</span>
             </Link>
-            <Link href="/tv" className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-              Browse TV Shows
+            <Link href="/tv-shows" className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors flex items-center space-x-2">
+              <FiTv className="h-5 w-5" />
+              <span>Browse TV Shows</span>
             </Link>
           </div>
         </div>
@@ -100,7 +97,7 @@ export default function Home() {
               </div>
             </Link>
             
-            <Link href="/tv" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
+            <Link href="/tv-shows" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
               <div className="flex items-center space-x-3">
                 <FiTrendingUp className="h-8 w-8 text-green-600 group-hover:scale-110 transition-transform" />
                 <div>
@@ -110,7 +107,7 @@ export default function Home() {
               </div>
             </Link>
             
-            <Link href="/discover" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
+            <Link href="/search" className="group p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-all">
               <div className="flex items-center space-x-3">
                 <FiCalendar className="h-8 w-8 text-purple-600 group-hover:scale-110 transition-transform" />
                 <div>
@@ -157,7 +154,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white font-display">Trending TV Shows</h2>
-            <Link href="/tv" className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
+            <Link href="/tv-shows" className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
               <span>View All</span>
               <FiChevronRight className="h-4 w-4" />
             </Link>

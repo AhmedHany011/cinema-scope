@@ -1,6 +1,7 @@
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from '../contexts/UserContext.jsx';
+import Header from '../components/Navbar.jsx';
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -21,7 +22,10 @@ export default function RootLayout({ children }) {
         className={`${roboto.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}
       >
         <UserProvider>
-          {children}
+          <Header />
+          <div className="pt-16">
+            {children}
+          </div>
         </UserProvider>
       </body>
     </html>

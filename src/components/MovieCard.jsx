@@ -9,8 +9,12 @@ import { useUser } from '../contexts/UserContext';
 const MovieCard = ({ item, type = 'movie' }) => {
   const { addToFavorites, removeFromFavorites, addToWatchlist, removeFromWatchlist, isInFavorites, isInWatchlist } = useUser();
   
-  const title = item.title || item.name;
-  const releaseDate = item.release_date || item.first_air_date;
+  // Ensure we have valid data before rendering
+  // Only filter by vote count if it's explicitly required (handled at the parent level)
+  if (!item) return null;
+  
+  const title = item.title || item.name || 'Untitled';
+  const releaseDate = item.release_date || item.first_air_date || '';
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
   const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
   const itemUrl = `/${type}/${item.id}`;
@@ -48,6 +52,10 @@ const MovieCard = ({ item, type = 'movie' }) => {
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            onError={(e) => {
+              // Handle image loading errors gracefully
+              e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.svg.png';
+            }}
           />
           
           {/* Overlay with rating */}
@@ -65,6 +73,7 @@ const MovieCard = ({ item, type = 'movie' }) => {
                   ? 'bg-red-500 text-white'
                   : 'bg-black/50 text-white hover:bg-red-500'
               }`}
+              aria-label={isInFavorites(item.id) ? "Remove from favorites" : "Add to favorites"}
             >
               <FiHeart className="h-4 w-4" />
             </button>
@@ -75,6 +84,7 @@ const MovieCard = ({ item, type = 'movie' }) => {
                   ? 'bg-green-500 text-white'
                   : 'bg-black/50 text-white hover:bg-green-500'
               }`}
+              aria-label={isInWatchlist(item.id) ? "Remove from watchlist" : "Add to watchlist"}
             >
               <FiBookmark className="h-4 w-4" />
             </button>

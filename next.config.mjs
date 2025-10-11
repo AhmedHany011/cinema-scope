@@ -10,7 +10,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
+        hostname: 'upload.wikimedia.org',
         port: '',
         pathname: '/**',
       },
