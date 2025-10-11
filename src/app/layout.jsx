@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       >
         <UserProvider>
           <Header />
-          <div className="pt-16">
+          <div className="pt-12">
             {children}
           </div>
         </UserProvider>

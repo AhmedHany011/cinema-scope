@@ -7,7 +7,8 @@ import Loading from '../../components/Loading';
 import { searchMulti } from '../../utils/tmdb';
 import { FiSearch, FiX } from 'react-icons/fi';
 
-export default function SearchPage() {
+// Create a client component that uses useSearchParams
+function SearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('query') || '';
@@ -233,5 +234,16 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Wrap the component in Suspense for server-side rendering
+import { Suspense } from 'react';
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><Loading className="h-96" /></div>}>
+      <SearchContent />
+    </Suspense>
   );
 }

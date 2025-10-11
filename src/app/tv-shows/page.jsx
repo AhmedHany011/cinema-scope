@@ -7,7 +7,8 @@ import Loading from '../../components/Loading';
 import { fetchPopularTV, fetchTVGenres, discoverTV, searchTV } from '../../utils/tmdb';
 import { FiSearch, FiFilter, FiX, FiStar, FiTrendingUp, FiCalendar, FiTv } from 'react-icons/fi';
 
-export default function TVShowsPage() {
+// Create a client component that uses useSearchParams
+function TVShowsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('query');
   
@@ -18,11 +19,12 @@ export default function TVShowsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState(''); // Changed to single genre selection
   const [sortBy, setSortBy] = useState('popularity.desc');
   const [year, setYear] = useState('');
   const [rating, setRating] = useState('');
   const [status, setStatus] = useState('');
+  const [goToPage, setGoToPage] = useState(''); // For direct page input
 
   // Fetch genres on mount
   useEffect(() => {
@@ -49,15 +51,16 @@ export default function TVShowsPage() {
         if (searchQuery) {
           // Search TV shows
           response = await searchTV(searchQuery, page);
-        } else if (selectedGenres.length > 0 || year || rating || sortBy !== 'popularity.desc' || status) {
+        } else if (selectedGenre || year || rating || sortBy !== 'popularity.desc' || status) {
           // Discover TV shows with filters
           const params = {
             page,
             sort_by: sortBy,
-            with_genres: selectedGenres.join(','),
             'vote_count.gte': 25  // Apply vote count filter as per project specifications
           };
           
+          // Add genre filter if selected
+          if (selectedGenre) params.with_genres = selectedGenre;
           if (year) params.first_air_date_year = year;
           if (rating) params['vote_average.gte'] = rating;
           if (status) params.with_status = status;
@@ -84,14 +87,11 @@ export default function TVShowsPage() {
     };
 
     fetchData();
-  }, [page, searchQuery, selectedGenres, sortBy, year, rating, status]);
+  }, [page, searchQuery, selectedGenre, sortBy, year, rating, status]);
 
-  const handleGenreChange = (genreId) => {
-    setSelectedGenres(prev => 
-      prev.includes(genreId) 
-        ? prev.filter(id => id !== genreId) 
-        : [...prev, genreId]
-    );
+  const handleGenreChange = (value) => {
+    setSelectedGenre(value);
+    setPage(1);
   };
 
   const handleSortChange = (value) => {
@@ -115,7 +115,7 @@ export default function TVShowsPage() {
   };
 
   const clearFilters = () => {
-    setSelectedGenres([]);
+    setSelectedGenre('');
     setSortBy('popularity.desc');
     setYear('');
     setRating('');
@@ -123,7 +123,16 @@ export default function TVShowsPage() {
     setPage(1);
   };
 
-  const hasFilters = selectedGenres.length > 0 || year || rating || status || sortBy !== 'popularity.desc';
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const pageNumber = parseInt(goToPage);
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setPage(pageNumber);
+      setGoToPage('');
+    }
+  };
+
+  const hasFilters = selectedGenre || year || rating || status || sortBy !== 'popularity.desc';
 
   // Sort options for TV shows
   const sortOptions = [
@@ -137,6 +146,16 @@ export default function TVShowsPage() {
     { value: 'name.desc', label: 'Name (Z-A)' }
   ];
 
+  // Rating options
+  const ratingOptions = [
+    { value: '', label: 'Any Rating' },
+    { value: '9', label: '9+ Stars' },
+    { value: '8', label: '8+ Stars' },
+    { value: '7', label: '7+ Stars' },
+    { value: '6', label: '6+ Stars' },
+    { value: '5', label: '5+ Stars' }
+  ];
+
   // Status options for TV shows
   const statusOptions = [
     { value: '', label: 'Any Status' },
@@ -146,6 +165,16 @@ export default function TVShowsPage() {
     { value: '3', label: 'Ended' },
     { value: '4', label: 'Canceled' },
     { value: '5', label: 'Pilot' }
+  ];
+
+  // Generate year options (last 50 years)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = [
+    { value: '', label: 'Any Year' },
+    ...Array.from({ length: 50 }, (_, i) => {
+      const year = currentYear - i;
+      return { value: year.toString(), label: year.toString() };
+    })
   ];
 
   return (
@@ -197,38 +226,35 @@ export default function TVShowsPage() {
               
               {/* Genres */}
               <div className="mb-6">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Genres</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Genre</h3>
+                <select
+                  value={selectedGenre}
+                  onChange={(e) => handleGenreChange(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Genres</option>
                   {genres.map((genre) => (
-                    <div key={genre.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`genre-${genre.id}`}
-                        checked={selectedGenres.includes(genre.id)}
-                        onChange={() => handleGenreChange(genre.id)}
-                        className="h-4 w-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <label 
-                        htmlFor={`genre-${genre.id}`} 
-                        className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                      >
-                        {genre.name}
-                      </label>
-                    </div>
+                    <option key={genre.id} value={genre.id}>
+                      {genre.name}
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
               
               {/* Year */}
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-3">First Air Year</h3>
-                <input
-                  type="number"
+                <select
                   value={year}
                   onChange={(e) => handleYearChange(e.target.value)}
-                  placeholder="e.g. 2023"
                   className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                >
+                  {yearOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               {/* Rating */}
@@ -239,12 +265,11 @@ export default function TVShowsPage() {
                   onChange={(e) => handleRatingChange(e.target.value)}
                   className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Any Rating</option>
-                  <option value="9">9+ Stars</option>
-                  <option value="8">8+ Stars</option>
-                  <option value="7">7+ Stars</option>
-                  <option value="6">6+ Stars</option>
-                  <option value="5">5+ Stars</option>
+                  {ratingOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               
@@ -294,14 +319,11 @@ export default function TVShowsPage() {
               {hasFilters && (
                 <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <span>Active filters:</span>
-                  {selectedGenres.map(genreId => {
-                    const genre = genres.find(g => g.id === genreId);
-                    return genre ? (
-                      <span key={genreId} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                        {genre.name}
-                      </span>
-                    ) : null;
-                  })}
+                  {selectedGenre && (
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                      {genres.find(g => g.id == selectedGenre)?.name || 'Genre'}
+                    </span>
+                  )}
                   {year && (
                     <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                       Year: {year}
@@ -356,35 +378,119 @@ export default function TVShowsPage() {
                   ))}
                 </div>
                 
-                {/* Pagination */}
-                <div className="flex justify-center items-center mt-8 space-x-2">
-                  <button
-                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
-                    disabled={page === 1}
-                    className={`px-4 py-2 rounded-lg ${
-                      page === 1 
-                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed' 
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    Previous
-                  </button>
+                {/* Enhanced Pagination */}
+                <div className="flex flex-col items-center mt-8 space-y-4">
+                  <div className="flex flex-wrap justify-center items-center gap-1">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                      disabled={page === 1}
+                      className={`px-3 py-2 rounded-lg ${
+                        page === 1 
+                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed' 
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    
+                    {/* First Page */}
+                    {page > 3 && (
+                      <>
+                        <button
+                          onClick={() => setPage(1)}
+                          className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          1
+                        </button>
+                        {page > 4 && <span className="px-2 py-2 text-gray-500">...</span>}
+                      </>
+                    )}
+                    
+                    {/* Pages before current */}
+                    {[...Array(2)].map((_, i) => {
+                      const pageNum = page - 2 + i;
+                      return pageNum > 0 ? (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          {pageNum}
+                        </button>
+                      ) : null;
+                    })}
+                    
+                    {/* Current Page */}
+                    <button
+                      className="px-3 py-2 rounded-lg bg-green-600 text-white"
+                      disabled
+                    >
+                      {page}
+                    </button>
+                    
+                    {/* Pages after current */}
+                    {[...Array(2)].map((_, i) => {
+                      const pageNum = page + 1 + i;
+                      return pageNum <= totalPages ? (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          {pageNum}
+                        </button>
+                      ) : null;
+                    })}
+                    
+                    {/* Last Page */}
+                    {page < totalPages - 2 && (
+                      <>
+                        {page < totalPages - 3 && <span className="px-2 py-2 text-gray-500">...</span>}
+                        <button
+                          onClick={() => setPage(totalPages)}
+                          className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+                    
+                    {/* Next Button */}
+                    <button
+                      onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={page === totalPages}
+                      className={`px-3 py-2 rounded-lg ${
+                        page === totalPages 
+                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed' 
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
                   
-                  <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
-                    Page {page} of {totalPages}
-                  </span>
-                  
-                  <button
-                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={page === totalPages}
-                    className={`px-4 py-2 rounded-lg ${
-                      page === totalPages 
-                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed' 
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    Next
-                  </button>
+                  {/* Page Input */}
+                  <form onSubmit={handleGoToPage} className="flex items-center space-x-2">
+                    <span className="text-gray-700 dark:text-gray-300">Go to page:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      value={goToPage}
+                      onChange={(e) => setGoToPage(e.target.value)}
+                      className="w-20 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <button
+                      type="submit"
+                      className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Go
+                    </button>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      of {totalPages}
+                    </span>
+                  </form>
                 </div>
               </>
             )}
@@ -392,5 +498,16 @@ export default function TVShowsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap the component in Suspense for server-side rendering
+import { Suspense } from 'react';
+
+export default function TVShowsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><Loading className="h-96" /></div>}>
+      <TVShowsContent />
+    </Suspense>
   );
 }
