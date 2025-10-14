@@ -21,7 +21,7 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/assets/logo.png"
+              src="/assets/logo.PNG"
               alt="Cinema Scope"
               width={120}
               height={42}

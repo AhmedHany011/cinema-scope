@@ -123,6 +123,32 @@ function TVShowsContent() {
     setPage(1);
   };
 
+  // Functions to clear individual filters
+  const clearGenreFilter = () => {
+    setSelectedGenre('');
+    setPage(1);
+  };
+
+  const clearSortFilter = () => {
+    setSortBy('popularity.desc');
+    setPage(1);
+  };
+
+  const clearYearFilter = () => {
+    setYear('');
+    setPage(1);
+  };
+
+  const clearRatingFilter = () => {
+    setRating('');
+    setPage(1);
+  };
+
+  const clearStatusFilter = () => {
+    setStatus('');
+    setPage(1);
+  };
+
   const handleGoToPage = (e) => {
     e.preventDefault();
     const pageNumber = parseInt(goToPage);
@@ -317,27 +343,93 @@ function TVShowsContent() {
             {/* Results Info */}
             <div className="flex justify-between items-center mb-6">
               {hasFilters && (
-                <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="hidden sm:flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <span>Active filters:</span>
                   {selectedGenre && (
-                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded flex items-center">
                       {genres.find(g => g.id == selectedGenre)?.name || 'Genre'}
+                      <button 
+                        onClick={clearGenreFilter}
+                        className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <FiX size={14} />
+                      </button>
                     </span>
                   )}
                   {year && (
-                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded flex items-center">
                       Year: {year}
+                      <button 
+                        onClick={clearYearFilter}
+                        className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <FiX size={14} />
+                      </button>
                     </span>
                   )}
                   {rating && (
-                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded flex items-center">
                       Rating: {rating}+
+                      <button 
+                        onClick={clearRatingFilter}
+                        className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <FiX size={14} />
+                      </button>
                     </span>
                   )}
                   {status && (
-                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                    <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded flex items-center">
                       Status: {statusOptions.find(s => s.value === status)?.label || status}
+                      <button 
+                        onClick={clearStatusFilter}
+                        className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <FiX size={14} />
+                      </button>
                     </span>
+                  )}
+                </div>
+              )}
+              
+              {/* Clear individual filters for mobile view */}
+              {hasFilters && (
+                <div className="sm:hidden flex flex-wrap gap-1">
+                  {selectedGenre && (
+                    <button 
+                      onClick={clearGenreFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs flex items-center"
+                    >
+                      {genres.find(g => g.id == selectedGenre)?.name || 'Genre'}
+                      <FiX className="ml-1" size={12} />
+                    </button>
+                  )}
+                  {year && (
+                    <button 
+                      onClick={clearYearFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs flex items-center"
+                    >
+                      {year}
+                      <FiX className="ml-1" size={12} />
+                    </button>
+                  )}
+                  {rating && (
+                    <button 
+                      onClick={clearRatingFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs flex items-center"
+                    >
+                      {rating}+
+                      <FiX className="ml-1" size={12} />
+                    </button>
+                  )}
+                  {status && (
+                    <button 
+                      onClick={clearStatusFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs flex items-center"
+                    >
+                      S
+                      <FiX className="ml-1" size={12} />
+                    </button>
                   )}
                 </div>
               )}
@@ -363,11 +455,49 @@ function TVShowsContent() {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Try adjusting your search or filters
                 </p>
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                  {selectedGenre && (
+                    <button 
+                      onClick={clearGenreFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded flex items-center"
+                    >
+                      {genres.find(g => g.id == selectedGenre)?.name || 'Genre'}
+                      <FiX className="ml-1" size={14} />
+                    </button>
+                  )}
+                  {year && (
+                    <button 
+                      onClick={clearYearFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded flex items-center"
+                    >
+                      Year: {year}
+                      <FiX className="ml-1" size={14} />
+                    </button>
+                  )}
+                  {rating && (
+                    <button 
+                      onClick={clearRatingFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded flex items-center"
+                    >
+                      Rating: {rating}+
+                      <FiX className="ml-1" size={14} />
+                    </button>
+                  )}
+                  {status && (
+                    <button 
+                      onClick={clearStatusFilter}
+                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded flex items-center"
+                    >
+                      Status: {statusOptions.find(s => s.value === status)?.label || status}
+                      <FiX className="ml-1" size={14} />
+                    </button>
+                  )}
+                </div>
                 <button 
                   onClick={clearFilters}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Clear Filters
+                  Clear All Filters
                 </button>
               </div>
             ) : (
